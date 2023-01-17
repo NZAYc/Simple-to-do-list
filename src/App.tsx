@@ -2,7 +2,7 @@ import React from 'react';
 import './App.css';
 import * as mui from "@mui/material/";
 import { styled } from "@mui/material/styles"
-import { listItemAvatarClasses } from '@mui/material/';
+import List from '@mui/material/List';
 
 
 const CssTextField = styled(mui.TextField)({
@@ -46,37 +46,34 @@ class App extends React.Component<{}, { list: string[], finished: string[] }> { 
     this.setState({ list: lista })
   }
 
-  // remove() {
-  //   let lista = this.state.list
-  //   lista.pop()
-  //   this.setState({ list: lista })
-  // }
+  appendToFinnished(item: any) {
 
-  appendToFinnished() {
+    // let finishedList = this.state.finished
+    // let toDoList = this.state.list
 
-    let finishedList = this.state.finished
-    let toDoList = this.state.list
+    // if (this.state.list.length > 0) {
+    //   let pushedItem = toDoList[this.state.list.length - 1]
+    //   finishedList.push(pushedItem)
+    //   toDoList.pop()
+    // }
 
-    if (this.state.list.length > 0) {
-      let pushedItem = toDoList[this.state.list.length - 1]
-      finishedList.push(pushedItem)
-      toDoList.pop()
-    }
+    // this.setState({ finished: finishedList, list: toDoList })
 
-    this.setState({ finished: finishedList, list: toDoList })
+    let finishedList = [...this.state.finished, item];        // dont understand
+    let toDoList = this.state.list.filter(i => i !== item);
+    this.setState({ finished: finishedList, list: toDoList });
   }
 
   clear() {
     this.setState({ finished: [], list: [] })
   }
 
-  // add finished list on the left to display removed items from the central list (preferably with a cap)
   render() {
     return (
       <div className="App">
         <div className='titles'>
           <div style={{ marginLeft: "5vw" }}>
-            <mui.Box sx={{ border: 2, borderColor: 'grey.500', borderRadius: '12px', height: "450px" }}>
+            <mui.Box sx={{ border: 2, borderColor: 'grey.500', borderRadius: '12px', height: "600px", bgcolor: "#242424" }}>
               <h2>FINISHED LIST</h2>
               <br />
               <ul style={{ width: "300px", height: "300px", overflow: "auto" }} >
@@ -87,20 +84,34 @@ class App extends React.Component<{}, { list: string[], finished: string[] }> { 
             </mui.Box>
           </div>
           <div style={{ marginLeft: "15vw", marginRight: "30vw" }}>
-            <mui.Box sx={{ border: 2, borderColor: 'grey.500', borderRadius: '12px', height: "450px" }}>
+            <mui.Box sx={{ border: 2, borderColor: 'grey.500', borderRadius: '12px', height: "600px", bgcolor: "#242424" }}>
               <h2>TO DO LIST</h2>
               <br />
-              <ul style={{ width: "300px", height: "175px", overflow: "auto", paddingLeft: "120px" }}>
-                {this.state.list.map((element: any) => {
-                  return <li> {element} </li>
-                })}
-              </ul>
+              <List sx={{
+                width: "400px", maxWidth: 360, paddingLeft: "60px", height: "300px",
+                position: 'relative', overflow: 'auto', maxHeight: 300, '& ul': { padding: 0 },
+              }} subheader={<li />}>
+                <ul>
+                  {this.state.list.map((item: any) => (
+                    <li>
+
+                      <mui.Button onClick={() => this.appendToFinnished(item)}
+                        variant="outlined" color="secondary"
+                        sx={{ marginBottom: 1, marginTop: 1 }}>
+
+                        {item}
+
+                      </mui.Button>
+
+                    </li>
+                  ))}
+                </ul>
+              </List>
               <br />
-              <CssTextField size="small" sx={{ marginBottom: 2 }} id="input"></CssTextField>
+              <CssTextField size="small" sx={{ marginBottom: 2, marginTop: 2 }} id="input"></CssTextField>
               <br />
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <mui.Button variant='contained' color="error" sx={{ marginBottom: 2 }} onClick={this.submit.bind(this)}>SUBMIT</mui.Button>
-                <mui.Button variant='contained' color="success" sx={{ marginBottom: 2, marginLeft: 2 }} onClick={this.appendToFinnished.bind(this)}>FINISH</mui.Button>
+                <mui.Button variant='contained' color="success" sx={{ marginBottom: 2 }} onClick={this.submit.bind(this)}>SUBMIT</mui.Button>
                 <mui.Button variant='contained' sx={{ marginBottom: 2, marginLeft: 2 }} onClick={this.clear.bind(this)}>CLEAR</mui.Button>
               </div>
             </mui.Box>
@@ -110,6 +121,5 @@ class App extends React.Component<{}, { list: string[], finished: string[] }> { 
     );
   }
 }
-
 
 export default App;
