@@ -29,7 +29,7 @@ const CssTextField = styled(mui.TextField)({
   },
 });
 
-class App extends React.Component<{}, { list: string[], finished: string[] }> { //first one for props, second for state
+class App extends React.Component<{}, { list: any, finished: string[] }> { //first one for props, second for state
 
   constructor(props: any) {
     super(props)
@@ -41,31 +41,27 @@ class App extends React.Component<{}, { list: string[], finished: string[] }> { 
 
   submit() {
     let userInput = (document.getElementById("input") as HTMLInputElement).value
+    let newItem = {
+      id: Date.now(),
+      text: userInput
+    }
     let lista = this.state.list
-    lista.push(userInput)
+    lista.push(newItem)
     this.setState({ list: lista })
   }
 
   appendToFinnished(item: any) {
-
-    // let finishedList = this.state.finished
-    // let toDoList = this.state.list
-
-    // if (this.state.list.length > 0) {
-    //   let pushedItem = toDoList[this.state.list.length - 1]
-    //   finishedList.push(pushedItem)
-    //   toDoList.pop()
-    // }
-
-    // this.setState({ finished: finishedList, list: toDoList })
-
-    let finishedList = [...this.state.finished, item];        // dont understand
-    let toDoList = this.state.list.filter(i => i !== item);
-    this.setState({ finished: finishedList, list: toDoList });
+    let toDoList = this.state.list.filter((i: { id: any; }) => i.id !== item.id);     // state list - the item
+    let finishedList = [...this.state.finished, item];          // state finished + item
+    this.setState({ list: toDoList, finished: finishedList });
   }
 
-  clear() {
-    this.setState({ finished: [], list: [] })
+  clearToDo() {
+    this.setState({ list: [] })
+  }
+
+  clearFinished() {
+    this.setState({ finished: [] })
   }
 
   render() {
@@ -78,9 +74,14 @@ class App extends React.Component<{}, { list: string[], finished: string[] }> { 
               <br />
               <ul style={{ width: "300px", height: "300px", overflow: "auto" }} >
                 {this.state.finished.map((element: any) => {
-                  return <li> {element} </li>
+                  return <li style={{
+                    marginTop: 20, fontFamily: 'Arial'
+                  }}> {element.text} </li>
                 })}
               </ul>
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 92 }}>
+                <mui.Button variant='contained' sx={{ marginBottom: 2, marginLeft: 2 }} onClick={this.clearFinished.bind(this)}>CLEAR THE LIST</mui.Button>
+              </div>
             </mui.Box>
           </div>
           <div style={{ marginLeft: "15vw", marginRight: "30vw" }}>
@@ -91,28 +92,24 @@ class App extends React.Component<{}, { list: string[], finished: string[] }> { 
                 width: "400px", maxWidth: 360, paddingLeft: "60px", height: "300px",
                 position: 'relative', overflow: 'auto', maxHeight: 300, '& ul': { padding: 0 },
               }} subheader={<li />}>
-                <ul>
-                  {this.state.list.map((item: any) => (
-                    <li>
+                {this.state.list.map((item: any) => (
+                  <li>
+                    <mui.Button onClick={() => this.appendToFinnished(item)}
+                      variant="outlined" color="secondary"
+                      sx={{ marginBottom: 1, marginTop: 1, color: 'white', fontFamily: 'Arial' }}>
 
-                      <mui.Button onClick={() => this.appendToFinnished(item)}
-                        variant="outlined" color="secondary"
-                        sx={{ marginBottom: 1, marginTop: 1 }}>
+                      {item.text}
 
-                        {item}
-
-                      </mui.Button>
-
-                    </li>
-                  ))}
-                </ul>
+                    </mui.Button>
+                  </li>
+                ))}
               </List>
               <br />
               <CssTextField size="small" sx={{ marginBottom: 2, marginTop: 2 }} id="input"></CssTextField>
               <br />
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <mui.Button variant='contained' color="success" sx={{ marginBottom: 2 }} onClick={this.submit.bind(this)}>SUBMIT</mui.Button>
-                <mui.Button variant='contained' sx={{ marginBottom: 2, marginLeft: 2 }} onClick={this.clear.bind(this)}>CLEAR</mui.Button>
+                <mui.Button variant='contained' sx={{ marginBottom: 2, marginLeft: 2 }} onClick={this.clearToDo.bind(this)}>CLEAR THE LIST</mui.Button>
               </div>
             </mui.Box>
           </div>
