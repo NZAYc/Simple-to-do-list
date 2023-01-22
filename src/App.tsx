@@ -3,6 +3,8 @@ import './App.css';
 import * as mui from "@mui/material/";
 import { styled } from "@mui/material/styles"
 import List from '@mui/material/List';
+import { Dialog } from '@mui/material';
+import { Paper } from '@mui/material';
 
 
 const CssTextField = styled(mui.TextField)({
@@ -37,17 +39,20 @@ class App extends React.Component<{}, { list: any, finished: string[] }> { //fir
       list: [],
       finished: [],
     }
+    this.handleOpenDialog = this.handleOpenDialog.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
   }
 
   submit() {
     let userInput = (document.getElementById("input") as HTMLInputElement).value
     let newItem = {
       id: Date.now(),
-      text: userInput
+      text: userInput,
+      openDialog: false
     }
-    let lista = this.state.list
-    lista.push(newItem)
-    this.setState({ list: lista })
+    let tempList = this.state.list
+    tempList.push(newItem)
+    this.setState({ list: tempList })
   }
 
   appendToFinnished(item: any) {
@@ -55,6 +60,22 @@ class App extends React.Component<{}, { list: any, finished: string[] }> { //fir
     let finishedList = [...this.state.finished, item];          // state finished + item
     this.setState({ list: toDoList, finished: finishedList });
   }
+
+  handleOpenDialog = (id: number) => {
+    let list = [...this.state.list];
+    let index = list.findIndex(i => i.id === id);       // stromy explain find index pls
+    list[index].openDialog = true;
+    this.setState({ list });
+  };
+
+  handleEdit = (item: any) => {
+    let userInput = (document.getElementById(`input-${item.id}`) as HTMLInputElement).value;
+    let list = [...this.state.list];
+    let index = list.findIndex(i => i.id === item.id);  // stromy explain find index pls
+    list[index].text = userInput;
+    list[index].openDialog = false;
+    this.setState({ list });
+  };
 
   clearToDo() {
     this.setState({ list: [] })
@@ -94,13 +115,18 @@ class App extends React.Component<{}, { list: any, finished: string[] }> { //fir
               }} subheader={<li />}>
                 {this.state.list.map((item: any) => (
                   <li>
-                    <mui.Button onClick={() => this.appendToFinnished(item)}
-                      variant="outlined" color="secondary"
-                      sx={{ marginBottom: 1, marginTop: 1, color: 'white', fontFamily: 'Arial' }}>
-
+                    <mui.Button sx={{ marginTop: 1 }} variant='contained' color='error' onClick={this.appendToFinnished.bind(this)}>X</mui.Button>
+                    <mui.Button sx={{ marginLeft: 2, marginTop: 1 }} variant='outlined' onClick={() => this.handleOpenDialog(item.id)}>
                       {item.text}
-
                     </mui.Button>
+                    <Dialog open={item.openDialog} sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435, height: '25%' } }} maxWidth="xs">
+
+                      <mui.Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
+                        <mui.TextField sx={{ marginTop: 5 }} id={`input-${item.id}`} label="Edit to-do item" variant="outlined" defaultValue={item.text} />
+                        <mui.Button sx={{ marginTop: 5 }} variant='contained' onClick={() => this.handleEdit(item)}>Save</mui.Button>
+                      </mui.Box>
+
+                    </Dialog>
                   </li>
                 ))}
               </List>
