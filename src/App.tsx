@@ -1,10 +1,9 @@
 import React from 'react';
 import './App.css';
 import * as mui from "@mui/material/";
-import { styled } from "@mui/material/styles"
 import List from '@mui/material/List';
+import { styled } from "@mui/material/styles"
 import { Dialog } from '@mui/material';
-import { Paper } from '@mui/material';
 
 
 const CssTextField = styled(mui.TextField)({
@@ -44,7 +43,10 @@ class App extends React.Component<{}, { list: any, finished: string[] }> { //fir
   }
 
   submit() {
-    let userInput = (document.getElementById("input") as HTMLInputElement).value
+    let userInput = (document.getElementById("input") as HTMLInputElement).value.trim();
+    if (userInput.length == 0) {
+      return alert("Please enter a task");
+    }
     let newItem = {
       id: Date.now(),
       text: userInput,
@@ -56,24 +58,28 @@ class App extends React.Component<{}, { list: any, finished: string[] }> { //fir
   }
 
   appendToFinnished(item: any) {
-    let toDoList = this.state.list.filter((i: { id: any; }) => i.id !== item.id);     // state list - the item
-    let finishedList = [...this.state.finished, item];          // state finished + item
-    this.setState({ list: toDoList, finished: finishedList });
+    let toDoList = this.state.list.filter((listObject: { id: Number; }) => listObject.id !== item.id);     // state list - the item
+    let tempFinishedList = [...this.state.finished, item];          // state finished + item
+    this.setState({ list: toDoList, finished: tempFinishedList });
+  }
+
+  removeFromList = (item: any) => {
+    this.appendToFinnished(item);
   }
 
   handleOpenDialog = (id: number) => {
     let list = [...this.state.list];
-    let index = list.findIndex(i => i.id === id);       // stromy explain find index pls
+    let index = list.findIndex(i => i.id === id);
     list[index].openDialog = true;
-    this.setState({ list });
+    this.setState({ list });                        // mystery
   };
 
   handleEdit = (item: any) => {
     let userInput = (document.getElementById(`input-${item.id}`) as HTMLInputElement).value;
     let list = [...this.state.list];
-    let index = list.findIndex(i => i.id === item.id);  // stromy explain find index pls
-    list[index].text = userInput;
-    list[index].openDialog = false;
+    let window = list.findIndex(i => i.id === item.id);
+    list[window].text = userInput;
+    list[window].openDialog = false;
     this.setState({ list });
   };
 
@@ -115,18 +121,21 @@ class App extends React.Component<{}, { list: any, finished: string[] }> { //fir
               }} subheader={<li />}>
                 {this.state.list.map((item: any) => (
                   <li>
-                    <mui.Button sx={{ marginTop: 1 }} variant='contained' color='error' onClick={this.appendToFinnished.bind(this)}>X</mui.Button>
-                    <mui.Button sx={{ marginLeft: 2, marginTop: 1 }} variant='outlined' onClick={() => this.handleOpenDialog(item.id)}>
+                    <mui.Button variant='contained' color='success' sx={{ marginTop: 1 }} onClick={() => this.removeFromList(item)}> X </mui.Button>
+                    <mui.Button sx={{ marginLeft: 2, marginTop: 1 }} variant='outlined' color='secondary'
+                      onClick={() => this.handleOpenDialog(item.id)}>
                       {item.text}
                     </mui.Button>
-                    <Dialog open={item.openDialog} sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435, height: '25%' } }} maxWidth="xs">
-
-                      <mui.Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
-                        <mui.TextField sx={{ marginTop: 5 }} id={`input-${item.id}`} label="Edit to-do item" variant="outlined" defaultValue={item.text} />
-                        <mui.Button sx={{ marginTop: 5 }} variant='contained' onClick={() => this.handleEdit(item)}>Save</mui.Button>
-                      </mui.Box>
-
-                    </Dialog>
+                    <mui.ThemeProvider theme={mui.createTheme({ palette: { mode: "dark" } })}>
+                      <Dialog open={item.openDialog} sx={{ '& .MuiDialog-paper': { width: '80%', maxHeight: 435, height: '25%' } }} maxWidth="xs">
+                        <mui.Box display="flex" alignItems="center" justifyContent="center" flexDirection="column">
+                          <mui.TextField sx={{ marginTop: 5 }} id={`input-${item.id}`} label="Edit to-do item" variant="outlined"
+                            defaultValue={item.text} />
+                          <mui.Button sx={{ marginTop: 5 }} variant='contained'
+                            onClick={() => this.handleEdit(item)}>Save</mui.Button>
+                        </mui.Box>
+                      </Dialog>
+                    </mui.ThemeProvider>
                   </li>
                 ))}
               </List>
